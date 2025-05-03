@@ -3,37 +3,42 @@
 This file contains instructions for Claude Code when working with this repository.
 
 ## Project Overview
-Galactic Empire 3000 is a space empire management simulation game.
+Galactic Empire 3000 is a space empire management simulation game built with Java.
 
 ## Commands to Run
 
 ### Installation
 ```bash
-npm install
+mvn clean install
 ```
 
 ### Development
 ```bash
-npm run dev
+mvn compile
 ```
 
 ### Testing
 ```bash
-npm test
+mvn test
 ```
 
-### Linting
+### Running the Application
 ```bash
-npm run lint
+mvn exec:java
 ```
 
-### Building
+### Packaging
 ```bash
-npm run build
+mvn package
+```
+
+### Running the JAR
+```bash
+java -jar target/galactic-empire-3000-1.0-SNAPSHOT.jar
 ```
 
 ## Coding Guidelines
-- Follow ESLint configuration
-- Write unit tests for new features
-- Keep code modular and reusable
-- Document public APIs
+- Follow Java code conventions
+- Write JUnit tests for new features
+- Keep code modular and maintainable
+- Document public methods with Javadoc
