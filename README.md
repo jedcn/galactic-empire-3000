@@ -40,4 +40,10 @@ java -jar target/galactic-empire-3000-1.0-SNAPSHOT.jar
 mvn test
 ```
 
+## Formatting Code
+
+```bash
+mvn spring-javaformat:apply
+```
+
 [classic bbs game]: https://wiki.mbbsemu.com/doku.php?id=modules:mbmgemp
