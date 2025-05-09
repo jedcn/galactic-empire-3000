@@ -1,6 +1,5 @@
 package com.jedcn.ge3000.app;
 
-// GameWebSocketHandler.java
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -13,64 +12,69 @@ import java.util.Map;
 
 @Component
 public class GameWebSocketHandler extends TextWebSocketHandler {
-    private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final GameState gameState;
-    private final ObjectMapper objectMapper;
 
-    public GameWebSocketHandler(GameState gameState, ObjectMapper objectMapper) {
-        this.gameState = gameState;
-        this.objectMapper = objectMapper;
-    }
+	private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
 
-    @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        String playerId = session.getId();
-        sessions.put(playerId, session);
+	private final GameState gameState;
 
-        // Send welcome message
-        String welcomeText = gameState.joinGame(playerId);
-        GameMessage welcome = new GameMessage("state_update", welcomeText);
-        session.sendMessage(new TextMessage(objectMapper.writeValueAsString(welcome)));
+	private final ObjectMapper objectMapper;
 
-        // Broadcast player joined
-        broadcastToAll("Player " + playerId + " joined the game!");
-    }
+	public GameWebSocketHandler(GameState gameState, ObjectMapper objectMapper) {
+		this.gameState = gameState;
+		this.objectMapper = objectMapper;
+	}
 
-    @Override
-    public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        String playerId = session.getId();
-        GameMessage gameMessage = objectMapper.readValue(message.getPayload(), GameMessage.class);
+	@Override
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		String playerId = session.getId();
+		sessions.put(playerId, session);
 
-        if (gameMessage.getType().equals("command")) {
-            String result = gameState.processCommand(playerId, gameMessage.getData());
+		// Send welcome message
+		String welcomeText = gameState.joinGame(playerId);
+		GameMessage welcome = new GameMessage("state_update", welcomeText);
+		session.sendMessage(new TextMessage(objectMapper.writeValueAsString(welcome)));
 
-            // Send command response
-            GameMessage response = new GameMessage("command_response", result);
-            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(response)));
+		// Broadcast player joined
+		broadcastToAll("Player " + playerId + " joined the game!");
+	}
 
-            // Broadcast state update to all players
-            gameState.broadcastState(this::broadcastToAll);
-        }
-    }
+	@Override
+	public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+		String playerId = session.getId();
+		GameMessage gameMessage = objectMapper.readValue(message.getPayload(), GameMessage.class);
 
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        String playerId = session.getId();
-        sessions.remove(playerId);
-        gameState.leaveGame(playerId);
+		if (gameMessage.getType().equals("command")) {
+			String result = gameState.processCommand(playerId, gameMessage.getData());
 
-        // Broadcast player left
-        broadcastToAll("Player " + playerId + " left the game.");
-    }
+			// Send command response
+			GameMessage response = new GameMessage("command_response", result);
+			session.sendMessage(new TextMessage(objectMapper.writeValueAsString(response)));
 
-    private void broadcastToAll(String message) {
-        GameMessage broadcastMessage = new GameMessage("state_update", message);
-        sessions.values().forEach(session -> {
-            try {
-                session.sendMessage(new TextMessage(objectMapper.writeValueAsString(broadcastMessage)));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-    }
+			// Broadcast state update to all players
+			gameState.broadcastState(this::broadcastToAll);
+		}
+	}
+
+	@Override
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+		String playerId = session.getId();
+		sessions.remove(playerId);
+		gameState.leaveGame(playerId);
+
+		// Broadcast player left
+		broadcastToAll("Player " + playerId + " left the game.");
+	}
+
+	private void broadcastToAll(String message) {
+		GameMessage broadcastMessage = new GameMessage("state_update", message);
+		sessions.values().forEach(session -> {
+			try {
+				session.sendMessage(new TextMessage(objectMapper.writeValueAsString(broadcastMessage)));
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
 }
