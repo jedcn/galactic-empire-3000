@@ -1,9 +1,20 @@
 package com.jedcn.ge3000;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@SpringBootApplication
 public class Application {
 
 	public static void main(String[] args) {
-		System.out.println("Welcome to Galactic Empire 3000!");
+		SpringApplication.run(Application.class, args);
+	}
+
+	@Bean
+	public ObjectMapper objectMapper() {
+		return new ObjectMapper();
 	}
 
 }

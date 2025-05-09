@@ -25,7 +25,7 @@ mvn clean install
 ## Running the Application
 
 ```bash
-mvn exec:java
+mvn spring-boot:run
 ```
 
 Or after packaging:
