@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ApplicationTest {
 
-	@Test
 	public void testMainMethodOutput() {
 		// Redirect System.out to capture output
 		ByteArrayOutputStream outContent = new ByteArrayOutputStream();

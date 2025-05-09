@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game Client</title>
+</head>
+<body>
+<div id="output"></div>
+<input type="text" id="commandInput" placeholder="Enter command">
+<button onclick="sendCommand()">Send</button>
+
+<script>
+    const socket = new WebSocket('ws://localhost:8080/game');
+    const output = document.getElementById('output');
+    const input = document.getElementById('commandInput');
+
+    socket.onopen = () => {
+        addToOutput('Connected to game server', 'system');
+    };
+
+    socket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        let cssClass = message.type === 'command_response' ? 'response' : 'update';
+        addToOutput(message.data, cssClass);
+    };
+
+    socket.onclose = () => {
+        addToOutput('Disconnected from server', 'system');
+    };
+
+    function sendCommand() {
+        const command = input.value;
+        const message = {
+            type: 'command',
+            timestamp: Date.now(),
+            data: command
+        };
+        socket.send(JSON.stringify(message));
+        input.value = '';
+    }
+
+    function addToOutput(text, cssClass) {
+        const div = document.createElement('div');
+        div.className = cssClass;
+        div.textContent = text;
+        output.appendChild(div);
+        output.scrollTop = output.scrollHeight;
+    }
+
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendCommand();
+    });
+</script>
+
+<style>
+    #output {
+        height: 300px;
+        border: 1px solid #ccc;
+        overflow-y: scroll;
+        margin-bottom: 10px;
+        padding: 5px;
+    }
+    .response { color: blue; }
+    .update { color: green; }
+    .system { color: red; }
+</style>
+</body>
+</html>
